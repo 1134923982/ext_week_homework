@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello World</title>
+    <link rel="stylesheet" type="text/css" href="./ext/resources/css/ext-all.css" />
+    <!-- LIBS -->
+    <script type="text/javascript" src="./ext/adapter/ext/ext-base.js"></script>
+    <!-- ENDLIBS -->
+    <script type="text/javascript" src="./ext/ext-all.js"></script>
+    <style>
+        .test {
+            position: absolute
+        }
+    </style>
+    <script>
+        Ext.onReady(function() {
+            Ext.QuickTips.init();
+            Ext.form.Field.prototype.msgTarget = 'side';
+
+            var classStore = new Ext.data.ArrayStore({
+                id: 'class',
+                fields: ['class'],
+                data: [['01 class'], ['02 class']]
+            })
+
+            var root = new Ext.tree.AsyncTreeNode({text: 'root',expand: true})
+
+            var form = new Ext.FormPanel({
+                width: 400,
+                renderTo: 'form',
+                id: 'add',
+                bodyStyle: 'padding: 5px 5px 0',
+                defaults: {width: 230},
+                defaultType: 'textfield',
+                items: [{
+                    xtype: 'radiogroup',
+                    id: 'type',
+                    fieldLabel: 'select type',
+                    items: [
+                        {boxLabel: 'class', name: 'rb-auto', inputValue: 1},
+                        {boxLabel: 'student', name: 'rb-auto', inputValue: 2, checked: true},
+                    ],
+                    listeners: {
+                        'change': function () {
+                            if(Ext.getCmp('type').getValue().boxLabel==='class'){
+                                Ext.getCmp('combo').setVisible(false)
+                            }else{
+                                Ext.getCmp('combo').setVisible(true)
+                            }
+                        }
+                    }
+                },{
+                    fieldLabel: 'Name',
+                    id: 'name',
+                    name: 'name',
+                    allowBlank: false,
+                    emptyText: 'Input class/student name'
+                }
+                ,{
+                    xtype: 'combo',
+                    id: 'combo',
+                    fieldLabel: 'select class',
+                    emptyText: 'Choose/Input class',
+                    mode: 'local',
+                    store: classStore,
+                    valueField: 'class',
+                    displayField: 'class',
+                    listeners: {
+                        expand : function () {
+                            // Ext.Msg.alert("sds")
+                            var array = Ext.getCmp('tree').getRootNode().childNodes
+                            var data = []
+                            array.map(item => {
+                                data.push([item.text])
+                            })
+                            Ext.getCmp('combo').store.loadData(data)
+                        }
+                    }
+                }
+                ],
+                buttons: [{
+                    text: 'add',
+                    listeners: {
+                        'click': function (btn, e) {
+                            if(Ext.getCmp('type').getValue().boxLabel==='class'){
+                                var node = new Ext.tree.TreeNode({'text':Ext.getCmp('name').getValue(),'children':[], checked: true})
+                                root.appendChild(node)
+                                Ext.getCmp('add').form.reset()
+                            }else{
+                                console.log(Ext.getCmp('name').getValue().length)
+                                if(Ext.getCmp('name').getValue().length==0){
+                                    Ext.Msg.alert('名称不得为空')
+                                    return
+                                }
+                                var node = new Ext.tree.TreeNode({'text': Ext.getCmp('name').getValue(),"leaf": true, 'children':[], checked: true});
+                                var data = {}
+                                Ext.getCmp('tree').getRootNode().childNodes.forEach((item, index)=>{
+                                    console.log(item.text)
+                                    if(item.text===Ext.getCmp('combo').value){
+                                        data.index=index;
+                                        data.text=item.text;
+                                    }
+                                })
+                                if(JSON.stringify(data) == "{}"){
+                                    Ext.Msg.alert('请输入一个合法的班级名称')
+                                }else{
+                                    root.childNodes[data.index].appendChild(node)
+                                    Ext.getCmp('add').form.reset()
+                                }
+                            }
+                        }
+                    }
+                },{
+                    text: 'reset',
+                    listeners:{
+                        'click': function (btn, e) {
+                            Ext.getCmp('add').form.reset()
+                        }
+                    }
+                }
+                ]
+            })
+
+            var menu = new Ext.menu.Menu({
+                items: [{
+                    id: 'addStudent',
+                    text: 'Add Student'
+                },{
+                    id: 'addClass',
+                    text: 'Add Class'
+                },{
+                    id: 'deleteNode',
+                    text: 'Delete Node'
+                }],
+                listeners: {
+                    itemclick: function(item) {
+                        switch (item.id) {
+                            case 'deleteNode':
+                                var currentNode = item.parentMenu.contextNode;
+                                if(currentNode.parentNode){
+                                    currentNode.remove()
+                                }
+                                break;
+                            case 'addClass':
+                                Ext.MessageBox.show({
+                                    title: 'Add',
+                                    msg: 'Please input :',
+                                    width: 300,
+                                    buttons: Ext.MessageBox.OKCANCEL,
+                                    multiline: true,
+                                    fn: (btn, text) => {
+                                        let name = text;
+                                        var newNode = new Ext.tree.TreeNode({
+                                            text: name,
+                                            checked: true,
+                                            expanded: true
+                                        });
+                                        root.appendChild(newNode);
+                                    }
+                                })
+                                break;
+                            case 'addStudent':
+                                var addNode= item.parentMenu.contextNode;
+                                if(addNode.leaf)
+                                    break;
+                                Ext.MessageBox.show({
+                                    title: 'Add',
+                                    msg: 'Please input :',
+                                    width: 300,
+                                    buttons: Ext.MessageBox.OKCANCEL,
+                                    multiline: true,
+                                    fn: (btn, text) => {
+                                        let name = text;
+                                        var newNode = new Ext.tree.TreeNode({
+                                            text: name,
+                                            checked: true,
+                                            expanded: true,
+                                            leaf: true
+
+                                        });
+                                        addNode.appendChild(newNode);
+                                    }
+                                })
+
+                                break;
+                        }
+                    }
+                }
+            })
+
+            var tree = new Ext.tree.TreePanel({
+                el: 'tree',
+                id: 'tree',
+                title: 'tree',
+                rootVisible: false,
+                enableDD: true,
+                width: 400,
+                loader: new Ext.tree.TreeLoader({dataUrl: 'class.json', baseAttrs: {checked: true}} ),
+                root: root,
+                contextMenu: menu,
+                listeners: {
+                    contextmenu: function (node , e) {
+                        node.select()
+                        var treeContextMenu = node.getOwnerTree().contextMenu;
+                        treeContextMenu.contextNode = node;
+                        treeContextMenu.showAt(e.getXY())
+                    },
+                    beforemovenode: function (tree, node, oldParent, newParent, index) {
+                        if ((node.leaf && newParent.text!=='root')||(!node.leaf && newParent.text==='root')) {
+                            return true
+                        }
+                        return false
+                    }
+                }
+            })
+
+            // tree.on('nodedrop', function (e) {
+            //     if(e.)
+            //     Ext.Msg.alert('drag Event', 'current:'+e.dropNode.text + '  into:'+e.target.text+",point:"+e.point)
+            // })
+
+            var treeEditor = new Ext.tree.TreeEditor(tree, {allowBlank: false}, {
+                // listeners : {
+                //     complete: function (editor, currVal, origVal) {
+                //         if(currVal.indexOf(Zh)!=-1){
+                //         }
+                //         Ext.Msg.alert('Change from'+ origVal +'to'+currVal)
+                //     }
+                // }
+            })
+
+            tree.expandAll()
+            tree.render()
+
+
+        });
+    </script>
+</head>
+<body>
+<div id="form"></div>
+<div id="tree">
+</div>
+
+</body>
+</html>

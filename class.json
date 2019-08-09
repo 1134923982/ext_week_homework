@@ -1,0 +1,26 @@
+[
+  {
+    "text":  "01 class", "children": [
+    {
+      "text":  "011 ",
+      "leaf": true
+    },
+    {
+      "text":  "012",
+      "leaf": true
+    }
+  ]
+  },
+  {
+    "text":  "02 class", "children": [
+    {
+      "text":  "021 zhangsan",
+      "leaf": true
+    },
+    {
+      "text":  "022 lisi",
+      "leaf": true
+    }
+  ]
+  }
+]

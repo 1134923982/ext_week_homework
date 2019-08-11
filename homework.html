@@ -203,8 +203,14 @@
                     contextmenu: function (node , e) {
                         node.select()
                         var treeContextMenu = node.getOwnerTree().contextMenu;
+                        if(node.leaf){//set student can't add student
+                            treeContextMenu.get('addStudent').setDisabled(true)
+                        }else {
+                            treeContextMenu.get('addStudent').setDisabled(false)
+                        }
                         treeContextMenu.contextNode = node;
                         treeContextMenu.showAt(e.getXY())
+
                     },
                     beforemovenode: function (tree, node, oldParent, newParent, index) {
                         if ((node.leaf && newParent.text!=='root')||(!node.leaf && newParent.text==='root')) {
@@ -215,19 +221,8 @@
                 }
             })
 
-            // tree.on('nodedrop', function (e) {
-            //     if(e.)
-            //     Ext.Msg.alert('drag Event', 'current:'+e.dropNode.text + '  into:'+e.target.text+",point:"+e.point)
-            // })
 
             var treeEditor = new Ext.tree.TreeEditor(tree, {allowBlank: false}, {
-                // listeners : {
-                //     complete: function (editor, currVal, origVal) {
-                //         if(currVal.indexOf(Zh)!=-1){
-                //         }
-                //         Ext.Msg.alert('Change from'+ origVal +'to'+currVal)
-                //     }
-                // }
             })
 
             tree.expandAll()

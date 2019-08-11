@@ -204,9 +204,10 @@
                         node.select()
                         var treeContextMenu = node.getOwnerTree().contextMenu;
                         if(node.leaf){//set student can't add student
-                            treeContextMenu.get('addStudent').setDisabled(true)
+                            treeContextMenu.get('addStudent').setVisible(false)
+
                         }else {
-                            treeContextMenu.get('addStudent').setDisabled(false)
+                            treeContextMenu.get('addStudent').setVisible(true)
                         }
                         treeContextMenu.contextNode = node;
                         treeContextMenu.showAt(e.getXY())
